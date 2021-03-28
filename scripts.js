@@ -103,6 +103,8 @@ $(document).ready(function(){
                                 $("#campaignbanner").attr("src", event_banner_url);
                                 $('#eventdisplayname').html( "<h2>" + event_display_name +"</h2>");
                                 $('#causedisplayname').html( "<h4>Benefitting " + cause_display_name +"</h4>");
+                                $( ".donatebuttonarea" ).html( "<a class=\"btn btn-primary btn-lg btn-block\" href=\"https://streamlabscharity.com/" + cause_url_slug + "/event/" + event_url_slug + " \"> Donate </a>");
+                                
 
                                 // adds label to progress bar with total funds raised
                                 if (convertedAmountRaised != 0) {
@@ -111,7 +113,7 @@ $(document).ready(function(){
                                 
                                 } else {
                                     
-                                    $( ".progressbararea" ).html( "<a class=\"btn btn-primary btn-lg btn-block\" href=\"https://streamlabscharity.com/" + cause_url_slug + "/event/" + event_url_slug + " \"> Donate </a>");
+                                    $( ".progressbararea" ).html( "" );
                                 
                                 }                             
                                 
@@ -149,7 +151,7 @@ $(document).ready(function(){
                             $("#campaignbanner").attr("src", "");
                             $('#eventdisplayname').html( "");
                             $('#causedisplayname').html( "");
-                            $( ".progressbararea" ).html( "<div class=\"progress\"> <div class=\"progress-bar\"></div></div>");
+                            $( ".progressbararea" ).html( "" );
 
                         }
             
