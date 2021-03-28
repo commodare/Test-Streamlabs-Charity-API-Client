@@ -95,7 +95,7 @@ $(document).ready(function(){
                                 };
 
                                 // converts JSON data to value that Bootstrap progress bar can use
-                                eventProgressPercentage = Math.round(calculatePercentage(amount_raised, event_goal));
+                                eventProgressPercentage = Math.round(calculatePercentage(amount_raised, event_goal) / 100);
 
                                 console.log("eventProgressPercentage = " + eventProgressPercentage);
 
