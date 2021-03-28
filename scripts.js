@@ -1,19 +1,5 @@
 $(document).ready(function(){
 
-    $('#term').focus(function(){
-
-        var full = $("#campaignbanner").has("img").length ? true : false;
-
-        if(full == false){
-
-           $('#campaignbanner').empty();
-
-        }
-
-     });
-
-  
-
     var getData = function (){
 
         var charitySearchTerm = $('#term').val();
@@ -138,12 +124,12 @@ $(document).ready(function(){
 
                             //TODO: iterate through matching searches and populate list of matching results
                             
-                            $('#campaignarea').html( "<div class='alert alert-warning alert-dismissible fade show' role='alert'> Charity located in Streamlabs database, but no events found. <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"> <span aria-hidden=\"true\">&times;</span></button></div>");
+                            $('#campaignarea').html( "<div class='alert alert-warning alert-dismissible fade show' role='alert'> There are close matches in the Streamlabs database, but none with active events were found. <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"> <span aria-hidden=\"true\">&times;</span></button></div>");
                             $("#campaignbanner").attr("src", "");
                             $('#eventdisplayname').html( "");
                             $('#causedisplayname').html( "");
                             $( ".progressbararea" ).html( "" );
-                            
+                            $( ".donatebuttonarea" ).html( "");
                         } else {
 
                             $('#campaignarea').html( "<div class='alert alert-danger alert-dismissible fade show' role='alert'> No events found. <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"> <span aria-hidden=\"true\">&times;</button></span> </div>");
@@ -152,7 +138,7 @@ $(document).ready(function(){
                             $('#eventdisplayname').html( "");
                             $('#causedisplayname').html( "");
                             $( ".progressbararea" ).html( "" );
-
+                            $( ".donatebuttonarea" ).html( "");
                         }
             
                     });
