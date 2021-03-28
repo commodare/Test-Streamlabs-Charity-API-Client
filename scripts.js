@@ -1,170 +1,181 @@
 $(document).ready(function(){
 
-/* This function pulls in JSON data from Streamlabs Charity API and generates a thermometer based on overall campaign progress*/ 
-    //var charityID = "249690012852031488";
-    var charityID = "177589901091540992";
+    $('#term').focus(function(){
 
-    $.getJSON("https://streamlabscharity.com/api/v1/causes/" + charityID + "/events", function(data) { 
+        var full = $("#campaignbanner").has("img").length ? true : false;
 
-        let amount_raised;
-        let event_goal;
-        
-        console.log("data REQUEST started!");
+        if(full == false){
 
-        //divide by 100 to convert JSON value to include currency decimal
-        amount_raised = data[0].amount_raised;
-        //amount_raised = 100000;
-        
-        event_goal = data[0].goal.amount;
-        event_banner_url = data[0].page_settings.header_url;
+           $('#campaignbanner').empty();
 
-        //converts JSON data into percentage value that Jquery UI Progress bar will understand
+        }
 
-        function calculatePercentage(amountRaised, eventGoal) {
+     });
 
-            return amountRaised / eventGoal * 100;
-    
-        };
+  
+
+    var getData = function (){
+
+        var charitySearchTerm = $('#term').val();
 
         
-        
-        //grabs campaign banner URL from JSON data and inserts it onto html
-        $("#campaignbanner").attr("src", event_banner_url);
-
-        eventProgressPercentage = calculatePercentage(amount_raised, event_goal);
-
-        console.log("amount_raised value = " + amount_raised);
-        console.log("event_goal value = " + event_goal);
-        console.log("eventProgressPercentage = " + eventProgressPercentage);
-        console.log("event_banner_url = " + event_banner_url);
-        console.log("data REQUEST finished!");
-
-        $( "#progressbar" ).progressbar({
-        
-            value: eventProgressPercentage,
-
+        if(charitySearchTerm == ""){
             
-        });
+            // validate that a search term was entered before trying to search
+            console.log("charitySearchTerm value = " + charitySearchTerm);
+            $('#campaignarea').html( "<div class='alert alert-warning' role='alert'> Please enter a search term. </div>");
+
+    
+            }   else {
+                        
+               
+                console.log("if (charitySearchTerm == \"\") else condition started");
+        
+                
+                /* This function pulls in searchData data from Streamlabs Charity API to check on search results for user input*/ 
+
+                function getEventsData() {
+                    
+        
+                    $.getJSON("https://streamlabscharity.com/api/v1/causes/search?q=" + charitySearchTerm, function(searchData) {            
+                
+                        console.log('Value of searchData.length = ' + searchData.length);
+
+
+                        //Checks if returned JSON object has any data
+                        if (searchData.length != 0 && searchData[0].events_count !=0) {
+
+                            $('#campaignarea').html( "<div class='alert alert-success alert-dismissible fade show' role='alert'> Event found! <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"> <span aria-hidden=\"true\">&times;</span></button></div>");
+                            
+                            let charityId = searchData[0].id;
+
+                            function populateCharityContent() {
+            
+                                $.getJSON("https://streamlabscharity.com/api/v1/causes/" + charityId + "/events", function(data) { 
+                    
+                                let amount_raised;
+                                let event_goal;
+                                
+                                console.log("data REQUEST started!");
+                    
+                                //note: Streamlabs API returns currency as a whole number in total cents raised
+                                amount_raised = data[0].amount_raised;
+
+                                //sets event goal to calculate campaign progress percentage
+                                event_goal = data[0].goal.amount / 100;
+
+                                //set cause url slug to contruct event page URL
+
+                                cause_url_slug = data[0].cause.slug;
+
+                                //set event url slug to construct event page URL
+
+                                event_url_slug = data[0].slug;
+
+                                // converts values to numbers with commas.
+                                function numberWithCommas(x) {
+                                    x /= 100;
+                                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                }
+
+                                var convertedAmountRaised = numberWithCommas(amount_raised);
+
+                                //sets campaign banner image source
+                                event_banner_url = data[0].page_settings.header_url;
+
+                                //sets campaign event title header
+                                cause_display_name = data[0].cause.display_name;
+                                event_display_name = data[0].display_name;
+                    
+                                //converts searchData data into percentage value that Bootstrap 4 Progress bar will understand
+                                function calculatePercentage(amountRaised, eventGoal) {
+                    
+                                    return amountRaised / eventGoal * 100;
+                            
+                                };
+
+                                // converts JSON data to value that Bootstrap progress bar can use
+                                eventProgressPercentage = Math.round(calculatePercentage(amount_raised, event_goal));
+
+                                console.log("eventProgressPercentage = " + eventProgressPercentage);
+
+                                // grabs campaign banner URL from searchData data and inserts it onto html
+                                $("#campaignbanner").attr("src", event_banner_url);
+                                $('#eventdisplayname').html( "<h2>" + event_display_name +"</h2>");
+                                $('#causedisplayname').html( "<h4>Benefitting " + cause_display_name +"</h4>");
+
+                                // adds label to progress bar with total funds raised
+                                if (convertedAmountRaised != 0) {
+                                
+                                    $( ".progressbararea" ).html( "<div class=\"progress\"> <div class=\"progress-bar-striped bg-success\" role=\"progressbar\" style=\"width:" + eventProgressPercentage + "%\" aria-valuenow=" + eventProgressPercentage + " aria-valuemin=\"0\" aria-valuemax=\"100\"> $" + convertedAmountRaised + " / $" + event_goal + " raised</div></div>");
+                                
+                                } else {
+                                    
+                                    $( ".progressbararea" ).html( "<a class=\"btn btn-primary btn-lg btn-block\" href=\"https://streamlabscharity.com/" + cause_url_slug + "/event/" + event_url_slug + " \"> Donate </a>");
+                                
+                                }                             
+                                
+                    
+                                console.log("amount_raised value = " + amount_raised);
+                    
+                                console.log("event_goal value = " + event_goal);
+                    
+                                
+                    
+                                console.log("event_banner_url = " + event_banner_url);
+                    
+                                console.log("data REQUEST finished!");
+                    
+                                });
+                    
+                            };
+
+                            populateCharityContent();
+            
+                        }   else if (searchData.length != 0 && searchData[0].events_count == 0){
+
+                            //TODO: iterate through matching searches and populate list of matching results
+                            
+                            $('#campaignarea').html( "<div class='alert alert-warning alert-dismissible fade show' role='alert'> Charity located in Streamlabs database, but no events found. <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"> <span aria-hidden=\"true\">&times;</span></button></div>");
+                            $("#campaignbanner").attr("src", "");
+                            $('#eventdisplayname').html( "");
+                            $('#causedisplayname').html( "");
+                            $( ".progressbararea" ).html( "" );
+                            
+                        } else {
+
+                            $('#campaignarea').html( "<div class='alert alert-danger alert-dismissible fade show' role='alert'> No events found. <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"> <span aria-hidden=\"true\">&times;</button></span> </div>");
+                            
+                            $("#campaignbanner").attr("src", "");
+                            $('#eventdisplayname').html( "");
+                            $('#causedisplayname').html( "");
+                            $( ".progressbararea" ).html( "<div class=\"progress\"> <div class=\"progress-bar\"></div></div>");
+
+                        }
+            
+                    });
+
+                };
+            
+                getEventsData();
+
+                console.log("if (charitySearchTerm == \"\") else condition ended");
+
+            }
+        
+    };
+              
+
+    $('#search').click(getData);
+
+    $('#term').keyup(function(event){
+
+        if(event.keyCode == 13){
+
+            getData();
+
+        }
 
     });
-    
 
-    
-        
-    // $('#term').focus(function(){
-    //    var full = $("#poster").has("img").length ? true : false;
-    //    if(full == false){
-    //       $('#poster').empty();
-    //    }
-    // });
-      
-    
-
-    // var getPoster = function(){
-
-    //     function pullbasedata () {           
-         
-    //         $.getJSON("https://api.themoviedb.org/3/configuration?api_key=d5f205d2e377e16138957d57237f0b4e", function(data) { 
-
-    //            console.log("data REQUEST started!");
-               
-    //            // path to image base URL from IMDB API: data.images.base_url;
-    //            // path to poster slug from TMDB API: data.images.poster_sizes[3];
-
-    //            base_url = data.images.base_url;
-    //            postersize = data.images.poster_sizes[3];
-
-    //            console.log("data REQUEST finished!");
-    //            console.log("base url and postersize values = " + base_url + " + " + postersize);
-               
-    //         });
-
-    //     };
-      
-    //     function pullnoposterdata() {
-
-    //         $.getJSON("https://api.themoviedb.org/3/search/movie?api_key=d5f205d2e377e16138957d57237f0b4e&language=en-US&page=1&include_adult=false&query=goonies", function(json) {
-    //             console.log("pullnoposterdata REQUEST started!");
-
-    //             //json.results[0].poster_path;
-    //              $('#poster').html('<h2 class="loading">We\'re afraid nothing was found for that search. Perhaps you were looking for The Goonies? </h2> <img id="thePoster" src=' + base_url + postersize + json.results[0].poster_path + ' />');
-            
-    //             console.log("pullnoposterdata REQUEST finished!");
-    //         });
-         
-
-    //     };
-
-    //     function pullPosterData() {
-
-    //         $.getJSON("https://api.themoviedb.org/3/search/movie?api_key=d5f205d2e377e16138957d57237f0b4e&language=en-US&page=1&include_adult=false&query=" + film , function(json) {  
-
-    //         console.log("json.results value for pullPosterdata = "+ json.total_results);
-            
-    //         posterpath = json.results[0].poster_path;
-            
-    //         $('#poster').html('<h2 class="loading">Well, gee whiz! We found you a poster, skip!</h2><img id="thePoster" src=' + base_url + postersize + posterpath + ' />');
-         
-    //         });
-
-    //     };
-      
-    //     pullbasedata();
-
-    //     var film = $('#term').val();
-        
-    //     if(film == ""){
- 
-    //         $('#poster').html("<h2 class='loading'>Ha! We haven't forgotten to validate the form! Please enter something.</h2>");
- 
-    //         } else {
-
-    //         $('#poster').html("<h2 class='loading'>Your poster is on its way!</h2>");          
-               
-    //         console.log("if (film == \"\") else condition started");
-
-    //         //var resultsCount;
-
-
-    //         function getResultsCount() {
-                
-
-    //             $.getJSON("https://api.themoviedb.org/3/search/movie?api_key=d5f205d2e377e16138957d57237f0b4e&language=en-US&page=1&include_adult=false&query=" + film , function(json) {            
-                
-
-    //             console.log("json.total_results value in getResultsCount = "+ json.total_results);
-                
-    //             resultsCount = json.total_results;
-
-    //             if (resultsCount != "0" ) {
-                    
-    //                 pullPosterData();
-
-    //             } else {
-                    
-    //                 pullnoposterdata();  
-
-    //             }
-        
-    //             });
-    //         };
-
-            
-    //         getResultsCount();
-
-                   
-    //         console.log("if (film == \"\") else condition ended");
-              
-    //         }
- 
-    //     return false;
-    // }
- 
-    // $('#search').click(getPoster);
-    // $('#term').keyup(function(event){
-    //     if(event.keyCode == 13){
-    //         getPoster();
-    //     }
-    // });
- 
- });
+});
